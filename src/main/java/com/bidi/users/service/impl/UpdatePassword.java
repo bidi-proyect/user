@@ -1,7 +1,6 @@
 package com.bidi.users.service.impl;
 
 import com.bidi.users.dto.updatepassword.UpdatePasswordRequest;
-import com.bidi.users.dto.updateuser.UpdateUserRequest;
 import com.bidi.users.service.UpdatePasswordService;
 import com.bidi.users.util.MessageResponse;
 import com.bidi.users.util.UserException;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;

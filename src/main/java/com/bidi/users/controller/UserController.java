@@ -6,11 +6,13 @@ import com.bidi.users.dto.newuser.CreateUserRequest;
 import com.bidi.users.dto.updatepassword.UpdatePasswordRequest;
 import com.bidi.users.dto.updateuser.UpdateUserRequest;
 import com.bidi.users.dto.userbyid.UserById;
+import com.bidi.users.dto.userlist.ListUsers;
 import com.bidi.users.service.AuthUserService;
 import com.bidi.users.service.CreateUserService;
+import com.bidi.users.service.GetListUsersService;
+import com.bidi.users.service.GetUserByIdService;
 import com.bidi.users.service.UpdatePasswordService;
 import com.bidi.users.service.UpdateUserService;
-import com.bidi.users.service.GetUserByIdService;
 import com.bidi.users.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ public class UserController {
     private final AuthUserService authUserService;
     private final CreateUserService createUserService;
     private final GetUserByIdService getUserByIdService;
+    private final GetListUsersService getListUsersService;
     private final UpdateUserService updateUserService;
     private final UpdatePasswordService updatePasswordService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -47,6 +50,13 @@ public class UserController {
             @PathVariable String username) {
 
         return this.getUserByIdService.getUserInfo(username, token);
+    }
+
+    @GetMapping("list")
+    @ResponseStatus(HttpStatus.OK)
+    private List<ListUsers> getListUser(@RequestHeader("Authorization") String token) {
+
+        return this.getListUsersService.getListUsers(token);
     }
 
     @PostMapping("/auth")

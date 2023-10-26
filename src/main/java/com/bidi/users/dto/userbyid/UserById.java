@@ -1,6 +1,5 @@
 package com.bidi.users.dto.userbyid;
 
-import com.bidi.users.dto.userbyid.helpers.Attributes;
 import lombok.Data;
 
 @Data

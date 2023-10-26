@@ -1,4 +1,6 @@
 package com.bidi.users.dto.userlist;
 
-public class ListUsers {
+import com.bidi.users.dto.userbyid.UserById;
+
+public class ListUsers extends UserById {
 }
