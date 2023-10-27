@@ -45,7 +45,7 @@ public class UserController {
 
     @GetMapping("/{username}")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserById> getUserInfo(
+    public UserById getUserInfo(
             @RequestHeader("Authorization") String token,
             @PathVariable String username) {
 

@@ -30,14 +30,14 @@ public class GetUserById implements GetUserByIdService {
     private final RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(GetUserById.class);
     @Override
-    public List<UserById> getUserInfo(String idUser, String token) {
+    public UserById getUserInfo(String idUser, String token) {
         logger.info("IdUser: {}", idUser);
         try {
-            ResponseEntity<List<UserById>> response = this.restTemplate.exchange(
+            ResponseEntity<UserById> response = this.restTemplate.exchange(
                     basePath + getPath + idUser,
                     HttpMethod.GET,
                     setHttpEntity(token),
-                    new ParameterizedTypeReference<List<UserById>>() {}
+                    UserById.class
             );
             return response.getBody();
         }catch (HttpClientErrorException | HttpServerErrorException e) {

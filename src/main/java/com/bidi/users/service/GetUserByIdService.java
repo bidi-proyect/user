@@ -7,5 +7,5 @@ import java.util.List;
 
 @Service
 public interface GetUserByIdService {
-    List<UserById> getUserInfo(String idUser, String token);
+    UserById getUserInfo(String idUser, String token);
 }
