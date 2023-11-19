@@ -54,7 +54,7 @@ public class UserController {
         return this.getUserByIdService.getUserInfo(username, token);
     }
 
-    @GetMapping("list")
+    @GetMapping("/list")
     @ResponseStatus(HttpStatus.OK)
     private List<ListUsers> getListUser(@RequestHeader("Authorization") String token) {
 
