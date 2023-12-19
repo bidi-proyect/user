@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.bidi</groupId>
     <artifactId>users</artifactId>
-    <version>1.1.0-RC</version>
+    <version>1.1.0-RELEASE</version>
     <name>users</name>
     <description>auth</description>
     <properties>
