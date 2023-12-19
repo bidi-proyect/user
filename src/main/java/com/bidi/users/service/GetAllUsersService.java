@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public interface GetUserByIdService {
-    UserDto getUserById(String idUser);
+public interface GetAllUsersService {
+    List<UserDto> getAllUsers();
 }

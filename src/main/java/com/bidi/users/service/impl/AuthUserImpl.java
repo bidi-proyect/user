@@ -25,11 +25,11 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class AuthUser implements AuthUserService {
+public class AuthUserImpl implements AuthUserService {
 
     private final RestTemplate restTemplate;
     private final Environment environment;
-    private final Logger logger = LoggerFactory.getLogger(CreateUser.class);
+    private final Logger logger = LoggerFactory.getLogger(CreateUserImpl.class);
     @Value("${sso.config.url}")
     private String url;
     @Value("${sso.config.url.auth}")
@@ -41,7 +41,7 @@ public class AuthUser implements AuthUserService {
 
     @Override
     public AuthUserResponse authUser(AuthUserRequest authUserRequest) {
-        logger.info("Request: {}", authUserRequest.toString());
+        logger.info("Request is made...");
 
         try {
             ResponseEntity<AuthUserResponse> response = this.restTemplate.exchange(
@@ -49,11 +49,12 @@ public class AuthUser implements AuthUserService {
                     HttpMethod.POST,
                     setHttpEntity(authUserRequest),
                     AuthUserResponse.class);
+            logger.info("token generated successfully.");
             logger.debug("Token crm {}", response.getBody());
             return setResponse(response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             logger.error("Error {}", e.getMessage());
-            throw new UserException(e.getStatusCode(), "01", e.getMessage());
+            throw new UserException((HttpStatus) e.getStatusCode(), "01", e.getMessage());
         }
     }
 

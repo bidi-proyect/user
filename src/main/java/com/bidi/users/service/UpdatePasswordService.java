@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UpdatePasswordService {
     MessageResponse updatePassword(UpdatePasswordRequest updatePasswordRequest,
-                                   String idUser, String token);
+                                   String idUser);
 }

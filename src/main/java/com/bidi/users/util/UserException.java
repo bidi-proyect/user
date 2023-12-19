@@ -1,10 +1,14 @@
 package com.bidi.users.util;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 
-@Data
+@Setter
+@Getter
+@RequiredArgsConstructor
 public class UserException extends RuntimeException {
     private final HttpStatus statusCode;
     private final String code;
