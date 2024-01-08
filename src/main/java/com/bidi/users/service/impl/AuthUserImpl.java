@@ -1,13 +1,12 @@
 package com.bidi.users.service.impl;
 
-import com.bidi.users.dto.auth.request.AuthUserRequest;
-import com.bidi.users.dto.auth.response.AuthUserResponse;
+import com.bidi.users.dto.request.AuthUserRequest;
+import com.bidi.users.dto.response.AuthUserResponse;
 import com.bidi.users.service.AuthUserService;
 import com.bidi.users.util.StringConstants;
 import com.bidi.users.util.UserException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -25,14 +24,14 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AuthUserImpl implements AuthUserService {
 
     private final RestTemplate restTemplate;
     private final Environment environment;
-    private final Logger logger = LoggerFactory.getLogger(CreateUserImpl.class);
     @Value("${sso.config.url}")
     private String url;
-    @Value("${sso.config.url.auth}")
+    @Value("${sso.config.url.path.auth}")
     private String authPath;
     @Value("${sso.config.anonymouse.username}")
     private String username;
@@ -41,35 +40,37 @@ public class AuthUserImpl implements AuthUserService {
 
     @Override
     public AuthUserResponse authUser(AuthUserRequest authUserRequest) {
-        logger.info("Request is made...");
+        log.info("Request is made...");
 
         try {
             ResponseEntity<AuthUserResponse> response = this.restTemplate.exchange(
                     url + authPath,
                     HttpMethod.POST,
-                    setHttpEntity(authUserRequest),
+                    httpEntityForAuth(authUserRequest),
                     AuthUserResponse.class);
-            logger.info("token generated successfully.");
-            logger.debug("Token crm {}", response.getBody());
+
+            log.info("Token generated successfully.");
+
+            log.debug("Token crm {}", response.getBody());
             return setResponse(response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            logger.error("Error {}", e.getMessage());
-            throw new UserException((HttpStatus) e.getStatusCode(), "01", e.getMessage());
+            log.error("Error {}", e.getMessage());
+            throw new UserException(e.getStatusCode(), StringConstants.CODE_1, e.getMessage());
         }
     }
 
-    private HttpEntity<MultiValueMap<String, String>> setHttpEntity(AuthUserRequest authUserRequest) {
+    private HttpEntity<MultiValueMap<String, String>> httpEntityForAuth(AuthUserRequest authUserRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add(StringConstants.USERNAME, authUserRequest.getUsername());
         params.add(StringConstants.PASSWORD, authUserRequest.getPassword());
         params.add(StringConstants.GRANT_TYPE, environment.getProperty("sso.config.crm.grant-type"));
         params.add(StringConstants.CLIENT_ID, environment.getProperty("sso.config.crm.client-id"));
         params.add(StringConstants.CLIENT_SECRET, environment.getProperty("sso.config.crm.client-secret"));
 
-        return new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        return new HttpEntity<>(params, headers);
     }
 
     public AuthUserResponse setResponse(AuthUserResponse authUserResponse) {
@@ -82,7 +83,7 @@ public class AuthUserImpl implements AuthUserService {
 
     public boolean isResponseNull(AuthUserResponse authUserResponse) {
         if (authUserResponse == null) {
-            logger.error("Token is null");
+            log.error("Token is null");
             throw new UserException(HttpStatus.INTERNAL_SERVER_ERROR, "01", "Something was wrong.");
         }
         return false;

@@ -1,4 +1,4 @@
-package com.bidi.users.util;
+package com.bidi.users.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

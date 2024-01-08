@@ -13,5 +13,13 @@ public class StringConstants {
     * Code
     * Message
     */
+    public static final String CODE_1 = "-1";
+    public static final String CODE_00 = "00";
+    public static final String SUCCESSFULLY = "Successfully.";
+
+    public static final String CODE_01 = "01";
+    public static final String SOMETHING_WRONG = "Something was wrong.";
+
+
 
 }

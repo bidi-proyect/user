@@ -1,15 +1,23 @@
 package com.bidi.users.service.impl;
 
-import com.bidi.users.dto.UserDto;
+import com.bidi.users.dto.response.UserResponse;
 import com.bidi.users.service.GetUserByIdService;
-import com.bidi.users.util.KeycloakProvider;
+import com.bidi.users.util.StringConstants;
+import com.bidi.users.util.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
 
 @Service
@@ -17,36 +25,42 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GetUserByIdImpl implements GetUserByIdService {
 
+    private final RestTemplate restTemplate;
+    @Value("${sso.config.url}")
+    private String urlBase;
+    @Value("${sso.config.url.path.users}")
+    private String getPath;
+
     @Override
-    public UserDto getUserById(String idUser) {
-        UserRepresentation userRepresentation = KeycloakProvider.getRealmResource()
-                .users()
-                .get(idUser).toRepresentation();
-        return representationToDto1(userRepresentation);
+    public UserResponse getUserById(String token, String userId) {
+        String url = urlBase + getPath + userId;
+        try {
+            ResponseEntity<UserResponse> response = this.restTemplate
+                    .exchange(
+                            url, HttpMethod.GET,
+                            setHttpEntity(token),
+                            UserResponse.class
+                    );
+            return isResponse200(response);
+        }catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("Error {}", e.getMessage());
+            throw new UserException(e.getStatusCode(), StringConstants.CODE_1, e.getMessage());
+        }
     }
 
-    public UserDto representationToDto1(UserRepresentation user) {
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setUsername(user.getUsername());
-        userDto.setEmail(user.getEmail());
-        userDto.setFirstName(user.getFirstName());
-        userDto.setLastName(user.getLastName());
-        userDto.setCreatedTimestamp(String.valueOf(user.getCreatedTimestamp()));
-        return userDto;
+
+    public HttpEntity<UserResponse> setHttpEntity(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", token);
+        return new HttpEntity<>(headers);
     }
 
-    public List<UserDto> representationToDto(List<UserRepresentation> userRepresentations) {
-        return userRepresentations.stream()
-                .map(user -> {
-                    UserDto userDto = new UserDto();
-                    userDto.setId(user.getId());
-                    userDto.setUsername(user.getUsername());
-                    userDto.setEmail(user.getEmail());
-                    userDto.setFirstName(user.getFirstName());
-                    userDto.setLastName(user.getLastName());
-                    userDto.setCreatedTimestamp(String.valueOf(user.getCreatedTimestamp()));
-                    return userDto;
-                }).collect(Collectors.toList());
+    public UserResponse isResponse200(ResponseEntity<UserResponse> response) {
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("error");
+            throw new UserException(HttpStatus.CONFLICT, "01", "Error.");
+        }
+        return response.getBody();
     }
 }

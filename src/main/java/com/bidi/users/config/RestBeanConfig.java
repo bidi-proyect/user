@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestBeanConfig {
     @Bean
-    public RestTemplate restTemplateNonCertificate(){
+    public RestTemplate restTemplate(){
         return new RestTemplate();
     }
 }

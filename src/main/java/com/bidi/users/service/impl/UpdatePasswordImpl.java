@@ -1,18 +1,18 @@
 package com.bidi.users.service.impl;
 
-import com.bidi.users.dto.updatepassword.UpdatePasswordRequest;
+import com.bidi.users.dto.request.UpdatePasswordRequest;
 import com.bidi.users.service.UpdatePasswordService;
-import com.bidi.users.util.MessageResponse;
+import com.bidi.users.dto.response.MessageResponse;
+import com.bidi.users.util.StringConstants;
 import com.bidi.users.util.UserException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -20,39 +20,42 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class UpdatePasswordImpl implements UpdatePasswordService {
+    @Value("${sso.config.url}")
+    private String urlBase;
+    @Value("${sso.config.url.path.users}")
+    private String updatePath;
+    @Value("${sso.config.url.path.update}")
+    private String updatePathExtend;
 
     private final RestTemplate restTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(UpdatePasswordImpl.class);
-
-    @Value("${sso.config.url}")
-    private String endpointBase;
-    @Value("${sso.config.url.users}")
-    private String passwordPath;
 
     @Override
-    public MessageResponse updatePassword(
-            UpdatePasswordRequest updatePasswordRequest,
-            String idUser) {
-        logger.error("request: {}", updatePasswordRequest);
+    public MessageResponse updatePassword(String token, String userId, UpdatePasswordRequest updatePasswordRequest) {
+        log.info("Request is made...");
+        String url = urlBase + updatePath + userId + updatePathExtend;
         try {
-            restTemplate.exchange(setUrl(idUser), HttpMethod.PUT,
-                    setRequest(updatePasswordRequest),
-                    String.class);
-            return new MessageResponse("00", "Successfully.");
-        }catch (HttpClientErrorException | HttpServerErrorException e) {
-            logger.error("Error: {}", e.getMessage());
-            throw new UserException((HttpStatus) e.getStatusCode(), "01", e.getMessage());
+            ResponseEntity<MessageResponse> response = this.restTemplate
+                    .exchange(
+                            url, HttpMethod.PUT,
+                            setHttpEntity(token, updatePasswordRequest),
+                            MessageResponse.class
+                    );
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                return new MessageResponse(StringConstants.CODE_01, StringConstants.SOMETHING_WRONG);
+            }
+            return new MessageResponse(StringConstants.CODE_00, StringConstants.SUCCESSFULLY);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("Error {}", e.getMessage());
+            throw new UserException(e.getStatusCode(), StringConstants.CODE_1, e.getMessage());
         }
     }
 
-    public String setUrl(String idUser) {
-        return endpointBase + passwordPath + idUser + "/reset-password";
-    }
-
-    public HttpEntity<UpdatePasswordRequest> setRequest(UpdatePasswordRequest updatePasswordRequest) {
+    public HttpEntity<UpdatePasswordRequest> setHttpEntity(String token, UpdatePasswordRequest updatePasswordRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", token);
         return new HttpEntity<>(updatePasswordRequest, headers);
     }
 }

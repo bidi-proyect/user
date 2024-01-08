@@ -1,17 +1,16 @@
-package com.bidi.users.dto;
+package com.bidi.users.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Getter
-public class UserDto {
+public class UserResponse {
     private String id;
     private String username;
     private String email;

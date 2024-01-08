@@ -1,8 +1,8 @@
 package com.bidi.users.service.impl;
 
-import com.bidi.users.dto.request.UserRequest;
-import com.bidi.users.service.UpdateUserService;
+import com.bidi.users.dto.request.UpdatePasswordRequest;
 import com.bidi.users.dto.response.MessageResponse;
+import com.bidi.users.service.LogOutService;
 import com.bidi.users.util.StringConstants;
 import com.bidi.users.util.UserException;
 import lombok.RequiredArgsConstructor;
@@ -21,38 +21,44 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class UpdateUserImpl implements UpdateUserService {
+public class LogoutImpl implements LogOutService {
 
-    private final RestTemplate restTemplate;
     @Value("${sso.config.url}")
     private String urlBase;
     @Value("${sso.config.url.path.users}")
-    private String updatePath;
+    private String logoutPath;
+    @Value("${sso.config.url.path.logout}")
+    private String logoutPathExtend;
+
+    private final RestTemplate restTemplate;
+
     @Override
-    public MessageResponse updateUser(String token, String userId, UserRequest userRequest) {
+    public void logout(String token, String userId) {
         log.info("Request is made...");
-        String url = urlBase + updatePath + userId;
+        String url = urlBase + logoutPath + userId + logoutPathExtend;
+        log.info(url);
         try {
             ResponseEntity<MessageResponse> response = this.restTemplate
                     .exchange(
                             url, HttpMethod.PUT,
-                            setHttpEntity(token, userRequest),
+                            setHttpEntity(token),
                             MessageResponse.class
                     );
             if (!response.getStatusCode().is2xxSuccessful()) {
-                return new MessageResponse(StringConstants.CODE_01, StringConstants.SOMETHING_WRONG);
+                log.info("Error.");
             }
-            return new MessageResponse(StringConstants.CODE_00, StringConstants.SUCCESSFULLY);
+            log.info("Ok.");
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error("Error {}", e.getMessage());
             throw new UserException(e.getStatusCode(), StringConstants.CODE_1, e.getMessage());
         }
     }
 
-    public HttpEntity<UserRequest> setHttpEntity(String token, UserRequest userRequest) {
+    public HttpEntity<UpdatePasswordRequest> setHttpEntity(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", token);
-        return new HttpEntity<>(userRequest, headers);
+
+        return new HttpEntity<>(headers);
     }
 }
