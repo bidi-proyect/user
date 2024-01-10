@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class SnsConfig {
-    @Value("${cloud.aws.credentials.access-key}")
+/*    @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
     @Value("${cloud.aws.credentials.secret-key}")
     private String secretKey;
@@ -26,6 +26,6 @@ public class SnsConfig {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
     }
-
+*/
 
 }
