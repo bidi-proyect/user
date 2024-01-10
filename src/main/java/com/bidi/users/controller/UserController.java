@@ -42,8 +42,6 @@ public class UserController {
     private final UpdateUserService updateUserService;
     private final UpdatePasswordService updatePasswordService;
     private final LogOutService logOutService;
-    private final AmazonSNSClient amazonSNSClient;
-
     @GetMapping("/list")
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponse> getAllUsers(@RequestHeader("Authorization") String token) {
